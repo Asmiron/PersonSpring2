@@ -1,3 +1,4 @@
 # PersonSpring2
 
-Project based on Spring Framework.In particular SpringMVC and Spring Core
+Project based on Spring Framework
+In fact different branches uses different technologies
