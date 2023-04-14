@@ -1,45 +1,60 @@
 package com.yaram.Spring.DAO;
 
 import com.yaram.Spring.models.Person;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class PeopleDAO {
-    private static int PEOPLE_CONT;
-    private List<Person> People;
 
-    {
-        People = new ArrayList<>();
-        People.add(new Person(++PEOPLE_CONT, "Alexandr", "Yaramishyan@mail.com"));
-        People.add(new Person(++PEOPLE_CONT, "Vladislav", "VladikM@dodik.com"));
-        People.add(new Person(++PEOPLE_CONT, "Sergey", "Serezha@shiz.com"));
-        People.add(new Person(++PEOPLE_CONT, "Kirill", "Kirill@caban.com"));
+    private final SessionFactory sessionFactory;
+
+    public PeopleDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    @Transactional(readOnly = true)
     public List<Person> GetAll(){
-        return People;
+        Session session = sessionFactory.getCurrentSession();
+
+        return session.createQuery("select p from Person p", Person.class).getResultList();
     }
 
+    @Transactional(readOnly = true)
     public Person Show(int id){
-        return People.stream().filter(person -> person.getId() == id).findAny().orElse(null);
+        Session session = sessionFactory.getCurrentSession();
+
+        return session.get(Person.class, id);
+
     }
 
+    @Transactional
     public void Create(Person person){
-        person.setId(++PEOPLE_CONT);
-        People.add(person);
+        Session session = sessionFactory.getCurrentSession();
+
+        session.persist(person);
     }
 
+    @Transactional
     public void Update(int id, Person person){
-        Person PersonToBeUpdated = Show(id);
-        PersonToBeUpdated.setName(person.getName());
-        PersonToBeUpdated.setEmail(person.getEmail());
+        Session session = sessionFactory.getCurrentSession();
+
+        Person personToBeUpdated = session.get(Person.class, id);
+
+        personToBeUpdated.setName(person.getName());
+        personToBeUpdated.setEmail(person.getEmail());
     }
 
 
+    @Transactional
     public void Delete(int id){
-        People.removeIf(p -> p.getId() == id);
+        Session session = sessionFactory.getCurrentSession();
+
+        session.remove(session.get(Person.class, id));
+
     }
 }
