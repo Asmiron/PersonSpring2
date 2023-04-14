@@ -2,9 +2,9 @@ package com.yaram.Spring.Controlers;
 
 
 import com.yaram.Spring.DAO.PeopleDAO;
+import com.yaram.Spring.Services.PeopleService;
 import com.yaram.Spring.models.Person;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,23 +15,23 @@ import javax.validation.Valid;
 @Controller
 @RequestMapping("/people")
 public class PeopleControler {
-    private final PeopleDAO peopleDAO;
+    private final PeopleService peopleService;
 
     @Autowired
-    public PeopleControler(PeopleDAO peopleDAO) {
-        this.peopleDAO = peopleDAO;
+    public PeopleControler(PeopleService peopleService) {
+        this.peopleService = peopleService;
     }
 
     @GetMapping()
     public String index(Model model){
-        model.addAttribute("people", peopleDAO.GetAll());
+        model.addAttribute("people", peopleService.findall());
 
         return "People/people_index";
     }
 
     @GetMapping("/{id}")
     public String Show(@PathVariable("id") int id, Model model){
-        model.addAttribute("person", peopleDAO.Show(id));
+        model.addAttribute("person", peopleService.findOne(id));
         return "People/person_show";
     }
 
@@ -45,13 +45,13 @@ public class PeopleControler {
     public String Create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult){
         if (bindingResult.hasErrors())
             return "People/new";
-        peopleDAO.Create(person);
+        peopleService.save(person);
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
     public String Edit(@PathVariable("id") int id, Model model){
-        model.addAttribute("person", peopleDAO.Show(id));
+        model.addAttribute("person", peopleService.findOne(id));
         return "People/edit";
     }
 
@@ -59,13 +59,13 @@ public class PeopleControler {
     public String Update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, @PathVariable("id") int id) {
         if (bindingResult.hasErrors())
             return "People/edit";
-        peopleDAO.Update(id, person);
+        peopleService.update(person, id);
         return "redirect:/people";
     }
 
     @DeleteMapping("/{id}")
     public String Delete(@PathVariable("id") int id){
-        peopleDAO.Delete(id);
+        peopleService.delete(id);
         return "redirect:/people";
     }
 }
